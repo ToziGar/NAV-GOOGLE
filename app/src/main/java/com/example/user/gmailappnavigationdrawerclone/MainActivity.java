@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -38,6 +39,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
         navigationView.setNavigationItemSelectedListener(this);
         toggleNavigationDrawer();
+
+        // Set dummy data of 5 unread messages in menu_primary menu item.
+        displayCounter(R.id.menu_primary,5);
     }
 
     /**
@@ -91,6 +95,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 R.string.open_drawer, R.string.close_drawer);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
+    }
+
+    /**
+     * Sets the counter for MenuItem with id of menuItemId with int count.
+     * @param menuItemId
+     * @param count
+     */
+    private void displayCounter(int menuItemId, int count){
+        for (int i=0; i < navigationView.getMenu().size(); i++){
+            MenuItem item = navigationView.getMenu().getItem(i);
+            if (item.getItemId() == menuItemId){
+                TextView counter = (TextView) item.getActionView();
+                counter.setText(Integer.toString(count));
+            }
+        }
     }
 
     @Override
