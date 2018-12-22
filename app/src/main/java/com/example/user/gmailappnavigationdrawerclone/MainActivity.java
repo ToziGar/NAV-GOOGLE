@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Set dummy data of 5 unread messages in menu_primary menu item.
         displayCounter(R.id.menu_primary,5);
+        displayCounter(R.id.menu_social,2);
     }
 
     /**
@@ -103,7 +104,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * @param count
      */
     private void displayCounter(int menuItemId, int count){
-        for (int i=0; i < navigationView.getMenu().size(); i++){
+        int noOfItems = navigationView.getMenu().size();
+        for (int i=0; i < noOfItems; i++){
             MenuItem item = navigationView.getMenu().getItem(i);
             if (item.getItemId() == menuItemId){
                 TextView counter = (TextView) item.getActionView();

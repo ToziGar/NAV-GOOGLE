@@ -5,7 +5,6 @@
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
-
         <item
             android:id="@+id/menu_primary"
             android:icon="@drawable/ic_inbox_black_24dp"
@@ -23,7 +22,6 @@
             android:icon="@drawable/ic_local_offer_black_24dp"
             android:title="Promotions"
             app:actionLayout="@layout/menu_counter_layout" />
-
     </group>
 
     <item android:title="All Lables">
