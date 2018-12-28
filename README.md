@@ -20,9 +20,22 @@ If you are not sure of how to implement a standard navigation drawer, you can cl
 ![ezgif com-resize](https://user-images.githubusercontent.com/39665412/50374360-dba49b80-0627-11e9-9047-52cb7a78b592.gif)
 
 ## Tutorial
+
 There are many other tutorials/guide online that suggests using widgets like `RecycerView`, `ListView` or `Spinners`. However they are quite complicated and I suggest an easier solution that involves creating two seperate `menu` and having the 'spinner' arrow as a simple `ImageView`.
 ### Layout
-In the navigation drawer [header layout](https://github.com/wRorsjakz/Android-GmailNavigationDrawer/blob/master/app/src/main/res/layout/nav_header_layout.xml), include a `ImageView` with a vector asset showing the drop down arrow and give it an id:
+We will be using a `selector` to control the behaviour of the imageview and navigation drawer menu. First, create the `selector` in xml.
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_arrow_drop_up_white_24dp"
+        android:state_selected="true" />
+    <item android:drawable="@drawable/ic_arrow_drop_down_white_24dp" />
+</selector>
+```
+In the navigation drawer [header layout](https://github.com/wRorsjakz/Android-GmailNavigationDrawer/blob/master/app/src/main/res/layout/nav_header_layout.xml), include a `ImageView` with its src as the `selector` drawable declared above.
+
 ```xml
 <ImageView
         android:id="@+id/nav_header_arrow"
@@ -30,9 +43,10 @@ In the navigation drawer [header layout](https://github.com/wRorsjakz/Android-Gm
         android:layout_height="match_parent"
         android:layout_weight="20"
         android:padding="2dp"
-        android:src="@drawable/ic_arrow_drop_down_white_24dp" />
+        android:src="@drawable/navdrawer_menu_toggle" />
 ```
-Create two seperate navigation drawer `menu` like how you would normally do so for a standard navigation drawer.
+
+To create the menus, create two seperate navigation drawer `menu` like how you would normally do so for a standard navigation drawer.
 
 To have menu items grouped together with a seperator on top the group and without a title, just give the group an id:
 ```xml
@@ -70,23 +84,8 @@ imageViewArrow = header.findViewById(R.id.nav_header_arrow);
 
 ```
 
-The `onClick()` responds differently depending on which menu is currently showing - the other menu is thus shown. The easiest method I found is use a `selector` for the imageview. First, create a selector in xml.
+The `onClick()` responds differently depending on which menu is currently showing - the other menu is thus shown. The easiest method I found is use a `selector` for the imageview as decleared above.
 
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/ic_arrow_drop_up_white_24dp"
-        android:state_selected="true" />
-    <item android:drawable="@drawable/ic_arrow_drop_down_white_24dp" />
-</selector>
-```
-
-Then include it in your imageview in `android:src"`
-
-```xml
-android:src="@drawable/navdrawer_menu_toggle"
-```
 In java code, check for the state of the imageview with `isSelected()`. If you want your previously checked menu item to remain checked after returning from the other menu, then store the previous menu item's id and use `setCheckedItem()`.
 
 ```java
@@ -109,7 +108,7 @@ imageViewArrow.setOnClickListener(new View.OnClickListener() {
         });
 ```
 
-Use `getMenu().clear()` to remove the current menu in the drawer and `inflateMenu()` to inflate the other menu to be shown.
+Use `getMenu().clear()` to remove the current menu in the drawer and `inflateMenu()` to inflate the other menu to by shown.
 
 Respond to menu item click events in both menus as per normal be overriding `onNavigationItemSelected()`.
 
@@ -131,7 +130,7 @@ private void displayCounter(int menuItemId, int count){
 
 #### Lifecycle
 
-If you want your app to show a fragment as default when the app is first started, you can do so under launcher activity's `onCreate()` However, this will cause your default fragment to be always shown when your activity is destroyed, such as a configuration change. Hence check if `savedInstanceState` is null
+If you want your app to show a fragment as default when the app is first started, you can do so under launcher activity's `onCreate()`. However, this will cause your default fragment to be always shown when your activity is destroyed and recreated, such as after a configuration change. Hence under `onCreate()`, check if `savedInstanceState` is null first.
 
 ```java
 if(savedInstanceState == null){
