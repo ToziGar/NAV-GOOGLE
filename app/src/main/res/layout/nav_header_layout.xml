@@ -55,7 +55,7 @@
             android:layout_height="match_parent"
             android:layout_weight="20"
             android:padding="2dp"
-            android:src="@drawable/ic_arrow_drop_down_white_24dp" />
+            android:src="@drawable/navdrawer_menu_toggle"/>
 
     </LinearLayout>
 
