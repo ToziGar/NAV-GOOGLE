@@ -58,6 +58,7 @@ app:actionLayout="@layout/menu_counter_layout"
 ```
 ### Java
 In order to respond user's click, attach a `setOnClickListener()` to the arrow `ImageView` in the navigation drawer header after intialising it using `getHeaderView()`:
+
 ```java
 private ImageView imageViewArrow;
 
@@ -68,32 +69,46 @@ imageViewArrow = header.findViewById(R.id.nav_header_arrow);
 <!--- Attach listener to imageViewArrow here -->
 
 ```
-The `onClick()` responds differently depending on which menu is currently showing - the other menu is thus shown. The easiest method I found is to keep track of the number of times the arrow has been pressed:
-```java
-int x = 0;
-imageViewArrow.setOnClickListener(new View.OnClickListener(){
-     @Override
-            public void onClick(View v) {
-                if (x == 0) {
-                    // Change the arrow
-                    imageViewArrow.setImageResource(R.drawable.ic_arrow_drop_up_white_24dp);
-                    // Remove current menu
-                    navigationView.getMenu().clear();
-                    // Inflate & Display the other menu
-                    navigationView.inflateMenu(R.menu.nav_menu_two);
-                } else if (x % 2 == 0) {
-                    imageViewArrow.setImageResource(R.drawable.ic_arrow_drop_up_white_24dp);
-                    navigationView.getMenu().clear();
-                    navigationView.inflateMenu(R.menu.nav_menu_two);
-                } else {
-                    imageViewArrow.setImageResource(R.drawable.ic_arrow_drop_down_white_24dp);
-                    navigationView.getMenu().clear();
-                    navigationView.inflateMenu(R.menu.nav_menu_one);
-                }
-                x += 1;
-            }
-});
+
+The `onClick()` responds differently depending on which menu is currently showing - the other menu is thus shown. The easiest method I found is use a `selector` for the imageview. First, create a selector in xml.
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_arrow_drop_up_white_24dp"
+        android:state_selected="true" />
+    <item android:drawable="@drawable/ic_arrow_drop_down_white_24dp" />
+</selector>
 ```
+
+Then include it in your imageview in `android:src"`
+
+```xml
+android:src="@drawable/navdrawer_menu_toggle"
+```
+In java code, check for the state of the imageview with `isSelected()`. If you want your previously checked menu item to remain checked after returning from the other menu, then store the previous menu item's id and use `setCheckedItem()`.
+
+```java
+imageViewArrow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               if(!v.isSelected()){
+                   currentItem = navigationView.getCheckedItem().getItemId();
+                   navigationView.getMenu().clear();
+                   navigationView.inflateMenu(R.menu.nav_menu_two);
+                   v.setSelected(true);
+               }
+               else{
+                   navigationView.getMenu().clear();
+                   navigationView.inflateMenu(R.menu.nav_menu_one);
+                   navigationView.setCheckedItem(currentItem);
+                   v.setSelected(false);
+               }
+            }
+        });
+```
+
 Use `getMenu().clear()` to remove the current menu in the drawer and `inflateMenu()` to inflate the other menu to be shown.
 
 Respond to menu item click events in both menus as per normal be overriding `onNavigationItemSelected()`.
@@ -113,6 +128,20 @@ private void displayCounter(int menuItemId, int count){
         }
     }
 ```
+
+#### Lifecycle
+
+If you want your app to show a fragment as default when the app is first started, you can do so under launcher activity's `onCreate()` However, this will cause your default fragment to be always shown when your activity is destroyed, such as a configuration change. Hence check if `savedInstanceState` is null
+
+```java
+if(savedInstanceState == null){
+            navigationView.setCheckedItem(R.id.menu_primary);
+            getSupportFragmentManager().beginTransaction().replace(R.id.main_framelayout_id,
+                    new PrimaryFragment()).commit();
+            currentItem = R.id.menu_primary;
+        }
+```
+
 ## Dependencies / Built With 
 - [Design Support Library](https://developer.android.com/reference/android/support/design/package-summary) - The Design package provides APIs to support adding material design components and patterns to your apps
 - [CircleImageView](https://github.com/hdodenhof/CircleImageView) by hdodenhof - A circular ImageView for Android 
