@@ -84,7 +84,7 @@ imageViewArrow = header.findViewById(R.id.nav_header_arrow);
 
 ```
 
-The `onClick()` responds differently depending on which menu is currently showing - the other menu is thus shown. The easiest method I found is use a `selector` for the imageview as decleared above.
+The `onClick()` responds differently depending on which menu is currently showing - the other menu is thus shown. The easiest method I found is to use a `selector` for the imageview as declared above.
 
 In java code, check for the state of the imageview with `isSelected()`. If you want your previously checked menu item to remain checked after returning from the other menu, then store the previous menu item's id and use `setCheckedItem()`.
 
