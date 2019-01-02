@@ -1,12 +1,12 @@
 package com.example.user.gmailappnavigationdrawerclone;
 
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -24,7 +24,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ImageView imageViewArrow;
     private FrameLayout layoutContainer;
 
-    private int currentItem;
+    //Configuration change & menu inflate change variables
+    private boolean isHeaderOpened;
+    private int menuOneSelectedItemId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +34,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         initializeViews();
         handleHeaderToggle();
-        initializeDefault(savedInstanceState);
+
+        if (savedInstanceState == null) {
+            initializeDefault();
+        } else {
+            restoreState(savedInstanceState);
+        }
     }
 
     private void initializeViews() {
@@ -51,15 +58,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     /**
-     * Display the default menu item when app is first initialized
+     * Initialise default if savedInstanceState is null
      */
-    private void initializeDefault(Bundle bundle) {
-        if(bundle == null){
-            navigationView.setCheckedItem(R.id.menu_primary);
-            getSupportFragmentManager().beginTransaction().replace(R.id.main_framelayout_id,
-                    new PrimaryFragment()).commit();
-            currentItem = R.id.menu_primary;
+    private void initializeDefault() {
+        navigationView.setCheckedItem(R.id.menu_primary);
+        getSupportFragmentManager().beginTransaction().replace(R.id.main_framelayout_id,
+                new PrimaryFragment()).commit();
+        menuOneSelectedItemId = R.id.menu_primary;
+    }
+
+    /**
+     * Restore state if savedInstanceState is not null
+     * @param bundle
+     */
+    private void restoreState(Bundle bundle) {
+        isHeaderOpened = bundle.getBoolean("isHeaderOpened");
+        menuOneSelectedItemId = bundle.getInt("menuOneSelectedItemId");
+        Log.d("MYTAG", "initializeDefault: boolean is " + isHeaderOpened);
+        if (isHeaderOpened) {
+            navigationView.getMenu().clear();
+            navigationView.inflateMenu(R.menu.nav_menu_two);
+            imageViewArrow.setSelected(true);
+        } else {
+            navigationView.getMenu().clear();
+            navigationView.inflateMenu(R.menu.nav_menu_one);
+            imageViewArrow.setSelected(false);
         }
+    }
+
+    /**
+     * @param outState
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("isHeaderOpened", isHeaderOpened);
+        outState.putInt("menuOneSelectedItemId", menuOneSelectedItemId);
+        Log.d("MYTAG", "onSaveInstanceState: Saved variable as" + isHeaderOpened);
     }
 
     /**
@@ -72,18 +107,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         imageViewArrow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               if(!v.isSelected()){
-                   currentItem = navigationView.getCheckedItem().getItemId();
-                   navigationView.getMenu().clear();
-                   navigationView.inflateMenu(R.menu.nav_menu_two);
-                   v.setSelected(true);
-               }
-               else{
-                   navigationView.getMenu().clear();
-                   navigationView.inflateMenu(R.menu.nav_menu_one);
-                   navigationView.setCheckedItem(currentItem);
-                   v.setSelected(false);
-               }
+                if (!v.isSelected()) {
+                    // Navigation drawer header is closed to begin with - now is opened
+                    Log.d("MYTAG", "onClick: Setting to true");
+                    isHeaderOpened = true;
+                    menuOneSelectedItemId = navigationView.getCheckedItem().getItemId();
+                    navigationView.getMenu().clear();
+                    navigationView.inflateMenu(R.menu.nav_menu_two);
+                    v.setSelected(true);
+                } else {
+                    Log.d("MYTAG", "onClick: Setting to false");
+                    isHeaderOpened = false;
+                    navigationView.getMenu().clear();
+                    navigationView.inflateMenu(R.menu.nav_menu_one);
+                    navigationView.setCheckedItem(menuOneSelectedItemId);
+                    v.setSelected(false);
+                }
             }
         });
     }
@@ -120,9 +159,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-        if (menuItem.getItemId() == navigationView.getCheckedItem().getItemId()) {
+        if (menuItem.getItemId() == menuOneSelectedItemId) {
             // Do nothing so that the fragment is not re-initialised
-            Log.d("menu_primary", "onNavigationItemSelected: Same menuitem") ;
+            Log.d("menu_primary", "onNavigationItemSelected: Same menuitem");
         } else {
             switch (menuItem.getItemId()) {
                 case R.id.menu_primary:
